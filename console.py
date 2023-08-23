@@ -2,15 +2,15 @@
 """ Console Module """
 import cmd
 import sys
+from os import getenv
 from models.base_model import BaseModel
-from models.__init__ import storage
+from models import storage
 from models.user import User
 from models.place import Place
 from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
-from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
@@ -114,45 +114,88 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        try:
-            if not line:
-                raise SyntaxError
-            my_list = line.split(" ")
-
-            kwargs = {}
-
-            for i in range(1, len(my_list)):
-                key, value = tuple(my_list[i].split("="))
-                if value[0] == '"':
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
-
-            if kwargs == {}:
-                obj = eval(my_list[0])()
-            else:
-                obj = eval(my_list[0])(**kwargs)
-                storage.new(obj)
-            print(obj.id)
-            obj.save()
-
-        except SyntaxError:
+    def do_create(self, arg):
+        """
+        Create an object with given parameters.
+        """
+        params = arg.split()
+        if not arg:
             print("** class name missing **")
             return
-        except NameError:
+
+        class_name = params[0]
+        try:
+            obj_class = getattr(sys.modules[__name__], class_name)
+        except AttributeError:
             print("** class doesn't exist **")
+            return
+
+        kwargs = {}
+        for param in params[1:]:
+            if '=' not in param:
+                continue
+            key, value = param.split('=', 1)
+            if not key.isidentifier():
+                continue
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+            elif '.' in value:
+                try:
+                    value = float(value)
+                except ValueError:
+                    continue
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    continue
+            kwargs[key] = value
+        try:
+            obj = obj_class(**kwargs)
+            """if isinstance(obj, City):
+                states = storage.all("State")
+                for key, state in states.items():
+                    if state.id == obj.state_id:
+                        obj.state = state"""
+            obj.save()
+            print(obj.id)
+        except Exception as e:
+            print("Error: {}".format(str(e)))
+            return
+
+    def do_state_cities(self, sta_id):
+        """
+        Shows all the cities related to the state
+        Usage: state_cities <state id>
+        """
+        states = storage.all("State")
+        for key, state in states.items():
+            if state.id == sta_id:
+                cities = state.cities
+                count = 1
+                for city in cities:
+                    print("city {} (id = {})".format(count, city.id))
+                    count += 1
+
+    def do_delete(self, obj_id):
+        """
+        Deletes an object from the database using the object's id
+        Usage: delete <obj id>
+        """
+        try:
+            objects = storage.all()
+            for key, obj in objects.items():
+                if obj.id == obj_id:
+                    storage.delete(obj)
+                    print("Has successfully deleted the object")
+        except Exception as e:
+            print("Error: {}".format(str(e)))
             return
 
     def help_create(self):
         """ Help information for the create method """
         print("Creates a class of any type")
-        print("[Usage]: create <className>\n")
+        print("Syntax: create <Class name> <param 1> <param 2> <param 3>...")
 
     def do_show(self, args):
         """ Method to show an individual object """
@@ -210,7 +253,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -229,13 +272,20 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
+            if getenv('HBNB_TYPE_STORAGE') == 'db':
+                for k, v in storage.all(args).items():
                     print_list.append(str(v))
+            else:
+                for k, v in storage._FileStorage__objects.items():
+                    if k.split('.')[0] == args:
+                        print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
-                print_list.append(str(v))
-
+            if getenv('HBNB_TYPE_STORAGE') == 'db':
+                for k, v in storage.all().items():
+                    print_list.append(str(v))
+            else:
+                for k, v in storage._FileStorage__objects.items():
+                    print_list.append(str(v))
         print(print_list)
 
     def help_all(self):

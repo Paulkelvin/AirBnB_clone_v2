@@ -1,19 +1,29 @@
 #!/usr/bin/python3
 """ City Module for HBNB project """
+import models
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.orm import relationship
+from os import getenv
 
 
 class City(BaseModel, Base):
-    """ Represents a city for a MySQL database.
-    Inherits from SQLAlchemy Base and links to the MySQL table cities.
-    Attributes:
-        __tablename__ (str): The name of the MySQL table to store Cities.
-        name (sqlalchemy String): The name of the City.
-        state_id (sqlalchemy String): The state id of the City.
-    """
-    __tablename__ = 'cities'
+    """ The city class, contains state ID and name """
+
+    __tablename__ = "cities"
     name = Column(String(128), nullable=False)
-    state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
-    places = relationship("Place", backref='cities', cascade="delete")
+    state_id = Column(String(60), ForeignKey("states.id"), nullable=False)
+    places = relationship("Place", backref="cities", cascade="all, delete")
+
+    def __init__(self, *args, **kwargs):
+        """
+        Instanciate City class and builds a relationship
+        with the State class
+        """
+        super().__init__(**kwargs)
+        from models.state import State
+        if getenv("HBNB_TYPE_STORAGE") == "db":
+            states = models.storage.all(State)
+            for key, obj in states.items():
+                if obj.id == self.state_id:
+                    self.state = obj
