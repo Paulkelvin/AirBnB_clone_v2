@@ -1,34 +1,41 @@
 #!/usr/bin/python3
-from fabric.api import put, run, local, env
-from os import path
+"""
+distributes an archive to your web servers
+"""
+import os
+from fabric.api import *
 
-
-env.hosts = ["54.167.24.215", "54.82.159.235"]
+env.hosts = ["54.237.117.152", "18.204.16.158"]
+env.user = "ubuntu"
+env.key = "~/.ssh/school"
 
 
 def do_deploy(archive_path):
-    """Fabric script that distributes
-    an archive to your web server"""
-
-    if not path.exists(archive_path):
-        return False
+    """
+    distributes an archive to your web servers
+    Args:
+        archive_path(str): path to archive to distribute
+    Returns:
+       Returns True if all operations have been done correctly,
+       otherwise returns False
+    """
+    if not os.path.exists(archive_path):
+        return (False)
     try:
-        tgzfile = archive_path.split("/")[-1]
-        print(tgzfile)
-        filename = tgzfile.split(".")[0]
-        print(filename)
-        pathname = "/data/web_static/releases/" + filename
-        put(archive_path, '/tmp/')
-        run("mkdir -p /data/web_static/releases/{}/".format(filename))
-        run("tar -zxvf /tmp/{} -C /data/web_static/releases/{}/"
-            .format(tgzfile, filename))
-        run("rm /tmp/{}".format(tgzfile))
-        run("mv /data/web_static/releases/{}/web_static/*\
-            /data/web_static/releases/{}/".format(filename, filename))
-        run("rm -rf /data/web_static/releases/{}/web_static".format(filename))
-        run("rm -rf /data/web_static/current")
-        run("ln -s /data/web_static/releases/{}/ /data/web_static/current"
-            .format(filename))
-        return True
+        put(archive_path, "/tmp")
+        file_name = archive_path.split('/')[-1]
+        folder_name = file_name.split('.')[0]
+        run('sudo mkdir -p /data/web_static/releases/{}/'.format(folder_name))
+        run('sudo tar -xzf /tmp/{} -C /data/web_static/releases/{}/'.
+            format(file_name, folder_name))
+        run('sudo rm /tmp/{}'.format(file_name))
+        run('sudo mv /data/web_static/releases/{}/web_static/* \
+            /data/web_static/releases/{}/'.format(folder_name, folder_name))
+        run('sudo rm -rf /data/web_static/releases/{}//web_static/'
+            .format(folder_name))
+        run('sudo rm -rf /data/web_static/current')
+        run('sudo ln -s /data/web_static/releases/{}/ /data/web_static/current'
+            .format(folder_name))
+        return (True)
     except Exception as e:
-        return False
+        return (False)
