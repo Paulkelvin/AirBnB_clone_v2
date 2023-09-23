@@ -1,49 +1,59 @@
 #!/usr/bin/python3
-"""
-Flask web application
-@authors: Samuel Atiemo & Mahmoud Khairi.
-"""
-from flask import Flask
-from flask import render_template
+"""Starts a simple web application"""
+
+from flask import Flask, render_template
+from markupsafe import escape
+
+
 app = Flask(__name__)
 
 
-@app.route('/', strict_slashes=False)
+@app.route("/", strict_slashes=False)
 def hello():
-    """Start a basic Flask web application"""
-    return 'Hello HBNB!'
+    """returns a simple string for the home directory"""
+    return "Hello HBNB!"
 
 
-@app.route('/hbnb', strict_slashes=False)
-def hbnb():
-    """Adding a specific route /hbnb"""
-    return 'HBNB'
+@app.route("/hbnb", strict_slashes=False)
+def hello_hbnb():
+    """returns a string for /hbnb"""
+    return "HBNB"
 
 
-@app.route('/c/<string:text>', strict_slashes=False)
-def c_text(text=None):
-    """Dynamic inputed text: C + replace _ for space and show text"""
-    return "C {}".format(text.replace('_', ' '))
+@app.route("/c/<text>", strict_slashes=False)
+def c_text(text):
+    """display variable text"""
+    text = escape(text)
+    text = "C " + text.replace("_", " ")
+    return text
 
 
-@app.route('/python', strict_slashes=False)
-@app.route('/python/<string:text>', strict_slashes=False)
-def python_text(text='is cool'):
-    """Dynamic inputed text: Python + replace _ for space and show text"""
-    return "Python {}".format(text.replace('_', ' '))
+@app.route("/python", strict_slashes=False)
+@app.route("/python/<text>", strict_slashes=False)
+def python_text(text="is cool"):
+    """display variable text
+
+    Args:
+        text: text to display
+    """
+    text = escape(text)
+    text = "Python " + text.replace("_", " ")
+    return text
 
 
-@app.route('/number/<int:n>', strict_slashes=False)
-def only_digits_dynamic(n=None):
-    """Dynamic inputted integer"""
-    return "{} is a number".format(n)
+@app.route("/number/<int:n>", strict_slashes=False)
+def check_number(n):
+    """display n if n is an integer"""
+    number = escape(n)
+    return f"{number} is a number"
 
 
-@app.route('/number_template/<int:n>', strict_slashes=False)
-def first_template(n=None):
-    """Display a HTML page only if n is an integer"""
-    return render_template('5-number.html', n=n)
+@app.route("/number_template/<int:n>", strict_slashes=False)
+def display_number(n):
+    """add number in template placeholder"""
+    number = escape(n)
+    return render_template("5-number.html", number=number)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

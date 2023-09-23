@@ -28,25 +28,5 @@ def c_text(text):
     return text
 
 
-@app.route("/python", strict_slashes=False)
-@app.route("/python/<text>", strict_slashes=False)
-def python_text(text="is cool"):
-    """display variable text
-
-    Args:
-        text: text to display
-    """
-    text = escape(text)
-    text = "Python " + text.replace("_", " ")
-    return text
-
-
-@app.route("/number/<int:n>", strict_slashes=False)
-def check_number(n):
-    """display n if n is an integer"""
-    number = escape(n)
-    return f"{number} is a number"
-
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

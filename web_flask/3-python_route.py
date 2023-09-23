@@ -41,12 +41,5 @@ def python_text(text="is cool"):
     return text
 
 
-@app.route("/number/<int:n>", strict_slashes=False)
-def check_number(n):
-    """display n if n is an integer"""
-    number = escape(n)
-    return f"{number} is a number"
-
-
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
