@@ -20,22 +20,9 @@ def hbnb():
 
 
 @app.route('/c/<string:text>', strict_slashes=False)
-def c_text(text=None):
-    """Dynamic inputed text: C + replace _ for space and show text"""
+def text(text=None):
+    """Dynamic inputed text: replace _ for space and show text"""
     return "C {}".format(text.replace('_', ' '))
-
-
-@app.route('/python', strict_slashes=False)
-@app.route('/python/<string:text>', strict_slashes=False)
-def python_text(text='is cool'):
-    """Dynamic inputed text: Python + replace _ for space and show text"""
-    return "Python {}".format(text.replace('_', ' '))
-
-
-@app.route('/number/<int:n>', strict_slashes=False)
-def only_digits_dynamic(n=None):
-    """Dynamic inputted integer"""
-    return "{} is a number".format(n)
 
 
 if __name__ == '__main__':

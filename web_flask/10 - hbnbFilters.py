@@ -5,6 +5,7 @@ Flask web application
 """
 from models import storage
 from models.state import State
+from models.amenity import Amenity
 from flask import Flask, render_template
 app = Flask(__name__)
 
@@ -16,11 +17,12 @@ def appcontext_teardown(self):
     storage.close()
 
 
-@app.route('/states_list', strict_slashes=False)
-def state_info():
+@app.route('/hbnb_filters', strict_slashes=False)
+def state_id():
     """Display a HTML page inside the tag BODY"""
-    return render_template('7-states_list.html',
-                           states=storage.all(State))
+    return render_template('10-hbnb_filters.html',
+                           states=storage.all(State),
+                           amenities=storage.all(Amenity))
 
 
 if __name__ == '__main__':

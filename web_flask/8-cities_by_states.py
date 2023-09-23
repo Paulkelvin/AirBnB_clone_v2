@@ -16,10 +16,10 @@ def appcontext_teardown(self):
     storage.close()
 
 
-@app.route('/states_list', strict_slashes=False)
+@app.route('/cities_by_states', strict_slashes=False)
 def state_info():
     """Display a HTML page inside the tag BODY"""
-    return render_template('7-states_list.html',
+    return render_template('8-cities_by_states.html',
                            states=storage.all(State))
 
 

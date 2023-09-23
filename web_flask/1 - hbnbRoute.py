@@ -1,26 +1,21 @@
 #!/usr/bin/python3
-""" Starts flask when run """
-
+"""
+Flask web application
+@authors: Samuel Atiemo & Mahmoud Khairi.
+"""
 from flask import Flask
-
 app = Flask(__name__)
 
 
-# Route: /
 @app.route('/', strict_slashes=False)
-def hello_hbnb():
-    """
-    This route displays a simple greeting message.
-    """
+def hello():
+    """Start a basic Flask web application"""
     return 'Hello HBNB!'
 
 
-# Route: /hbnb
 @app.route('/hbnb', strict_slashes=False)
 def hbnb():
-    """
-    This route displays "HBNB".
-    """
+    """Adding a specific route /hbnb"""
     return 'HBNB'
 
 
